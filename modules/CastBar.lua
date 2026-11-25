@@ -235,9 +235,12 @@ function CastBar.prototype:FlashBar(color, alpha, text, textColor)
 		r, g, b = self:GetColor(color)
 	end
 
-
-	self.frame:SetStatusBarColor(r, g, b, 0.3)
-	self.barFrame:SetStatusBarColor(self:GetColor(color, 0.8))
+	if (self.frame.bg) then
+		self.frame.bg:SetVertexColor(r, g, b, 0.3)
+	end
+	if (self.barFrame and self.barFrame.bar) then
+		self.barFrame.bar:SetVertexColor(self:GetColor(color, 0.8))
+	end
 
 	self:SetScale(self.barFrame.bar, 1)
 	self:SetBottomText1(text, textColor or "Text")

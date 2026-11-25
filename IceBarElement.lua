@@ -228,7 +228,7 @@ end
 -- Creates background for the bar
 function IceBarElement.prototype:CreateBackground()
 	if not (self.frame) then
-		self.frame = CreateFrame("StatusBar", "IceHUD_"..self.elementName, self.parent)
+		self.frame = CreateFrame("Frame", "IceHUD_"..self.elementName, self.parent)
 	end
 	
 	self.frame:SetFrameStrata("BACKGROUND")
@@ -249,8 +249,7 @@ function IceBarElement.prototype:CreateBackground()
 		self.frame.bg:SetTexCoord(0, 1, 0, 1)
 	end
 	
-	self.frame:SetStatusBarTexture(self.frame.bg)
-	self.frame:SetStatusBarColor(self:GetColor("undef", self.settings.alphabg))
+	self.frame.bg:SetVertexColor(self:GetColor("undef", self.settings.alphabg))
 	
 	local ownPoint = "LEFT"
 	if (self.moduleSettings.side == ownPoint) then
@@ -272,32 +271,26 @@ end
 -- Creates the actual bar
 function IceBarElement.prototype:CreateBar()
 	if not (self.barFrame) then
-		self.barFrame = CreateFrame("StatusBar", nil, self.frame)
+		self.barFrame = CreateFrame("Frame", nil, self.frame)
 	end
 	
 	self.barFrame:SetFrameStrata("LOW")
 	self.barFrame:SetWidth(self.settings.barWidth)
 	self.barFrame:SetHeight(self.settings.barHeight)
 	
-	
-	if not (self.barFrame.bar) then
-		self.barFrame.bar = self.frame:CreateTexture(nil, "BACKGROUND")
+	if (not self.barFrame.bar or self.barFrame.bar:GetParent() ~= self.barFrame) then
+		self.barFrame.bar = self.barFrame:CreateTexture(nil, "BACKGROUND")
 	end
 	
 	self.barFrame.bar:SetTexture(IceElement.TexturePath .. self.settings.barTexture)
-	self.barFrame.bar:SetAllPoints(self.frame)
-	
-	self.barFrame:SetStatusBarTexture(self.barFrame.bar)
-	
-	self:UpdateBar(1, "undef")
-	
-	local point = "LEFT"
-	if (self.moduleSettings.side == point) then
-		point = "RIGHT"
-	end
+	self.barFrame.bar:ClearAllPoints()
+	self.barFrame.bar:SetAllPoints(self.barFrame)
 	
 	self.barFrame:ClearAllPoints()
-	self.barFrame:SetPoint("BOTTOM"..point, self.frame, "BOTTOM"..self.moduleSettings.side, 0, 0)
+	self.barFrame:SetPoint("BOTTOMLEFT", self.frame, "BOTTOMLEFT")
+	self.barFrame:SetPoint("BOTTOMRIGHT", self.frame, "BOTTOMRIGHT")
+	
+	self:UpdateBar(1, "undef")
 end
 
 
@@ -372,6 +365,25 @@ end
 
 
 function IceBarElement.prototype:SetScale(texture, scale)
+	if not (texture) then
+		return
+	end
+
+	scale = scale or 0
+	if (scale < 0) then
+		scale = 0
+	elseif (scale > 1) then
+		scale = 1
+	end
+
+	local height = self.settings.barHeight * scale
+	local parent = texture:GetParent()
+	if (parent and parent ~= self.frame) then
+		parent:SetHeight(height)
+	else
+		texture:SetHeight(height)
+	end
+
 	if (self.moduleSettings.side == IceCore.Side.Left) then
 		texture:SetTexCoord(1, 0, 1-scale, 1)
 	else
@@ -400,10 +412,16 @@ function IceBarElement.prototype:UpdateBar(scale, color, alpha)
 		self.backgroundAlpha = self.settings.alphaoocbg
 	end
 
-	self.frame:SetStatusBarColor(r, g, b, self.backgroundAlpha)
-	self.barFrame:SetStatusBarColor(self:GetColor(color))
+	if (self.frame.bg) then
+		self.frame.bg:SetVertexColor(r, g, b, self.backgroundAlpha)
+	end
+	if (self.barFrame and self.barFrame.bar) then
+		self.barFrame.bar:SetVertexColor(self:GetColor(color))
+	end
 	
-	self:SetScale(self.barFrame.bar, scale)
+	if (self.barFrame and self.barFrame.bar) then
+		self:SetScale(self.barFrame.bar, scale)
+	end
 end
 
 

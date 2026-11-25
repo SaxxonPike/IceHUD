@@ -168,15 +168,17 @@ function ComboPoints.prototype:CreateComboFrame()
 	-- create backgrounds
 	for i = 1, 5 do
 		if (not self.frame.graphicalBG[i]) then
-			self.frame.graphicalBG[i] = CreateFrame("StatusBar", nil, self.frame)
-			self.frame.graphicalBG[i]:SetStatusBarTexture(IceElement.TexturePath .. "ComboBG")
+			self.frame.graphicalBG[i] = CreateFrame("Frame", nil, self.frame)
+			self.frame.graphicalBG[i].texture = self.frame.graphicalBG[i]:CreateTexture(nil, "BACKGROUND")
+			self.frame.graphicalBG[i].texture:SetTexture(IceElement.TexturePath .. "ComboBG")
+			self.frame.graphicalBG[i].texture:SetAllPoints(self.frame.graphicalBG[i])
 		end
 		self.frame.graphicalBG[i]:SetFrameStrata("BACKGROUND")
 		self.frame.graphicalBG[i]:SetWidth(self.comboSize)
 		self.frame.graphicalBG[i]:SetHeight(self.comboSize)
 		self.frame.graphicalBG[i]:SetPoint("TOPLEFT", (i-1) * (self.comboSize-5) + (i-1), 0)
 		self.frame.graphicalBG[i]:SetAlpha(0.15)
-		self.frame.graphicalBG[i]:SetStatusBarColor(self:GetColor("ComboPoints"))
+		self.frame.graphicalBG[i].texture:SetVertexColor(self:GetColor("ComboPoints"))
 
 		self.frame.graphicalBG[i]:Hide()
 	end
@@ -184,8 +186,10 @@ function ComboPoints.prototype:CreateComboFrame()
 	-- create combo points
 	for i = 1, 5 do
 		if (not self.frame.graphical[i]) then
-			self.frame.graphical[i] = CreateFrame("StatusBar", nil, self.frame.graphicalBG[i])
-			self.frame.graphical[i]:SetStatusBarTexture(IceElement.TexturePath .. "Combo")
+			self.frame.graphical[i] = CreateFrame("Frame", nil, self.frame.graphicalBG[i])
+			self.frame.graphical[i].texture = self.frame.graphical[i]:CreateTexture(nil, "BACKGROUND")
+			self.frame.graphical[i].texture:SetTexture(IceElement.TexturePath .. "Combo")
+			self.frame.graphical[i].texture:SetAllPoints(self.frame.graphical[i])
 		end
 		self.frame.graphical[i]:SetFrameStrata("BACKGROUND")
 		self.frame.graphical[i]:SetAllPoints(self.frame.graphicalBG[i])
@@ -194,7 +198,7 @@ function ComboPoints.prototype:CreateComboFrame()
 		if (self.moduleSettings.gradient) then
 			g = g - (0.15*i)
 		end
-		self.frame.graphical[i]:SetStatusBarColor(r, g, b)
+		self.frame.graphical[i].texture:SetVertexColor(r, g, b)
 
 		self.frame.graphical[i]:Hide()
 	end
